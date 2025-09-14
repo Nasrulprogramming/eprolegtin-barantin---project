@@ -83,7 +83,9 @@ return [
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    'locale' => 'id', // default bahasa Indonesia
+    'fallback_locale' => 'en', // fallback kalau terjemahan ga ada
+
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 

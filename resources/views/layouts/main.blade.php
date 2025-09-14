@@ -34,7 +34,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
         <div class="container-fluid">
             <a class="navbar-brand fw-bold" href="{{ url('/') }}">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo" width="120" class="me-2">
+                <img src="{{ asset('images/llogo.png') }}" alt="Logo" width="120" class="me-2">
                 E-PROLEGTIN
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
@@ -42,11 +42,12 @@
             </button>
             <div class="collapse navbar-collapse" id="mainNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="{{ url('/') }}">Beranda</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Tentang Kami</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('form.create') }}">E-Prolegtin</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">JDIH</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url('/admin') }}">Admin</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">{{ __('Beranda') }}</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">{{ __('Tentang Kami') }}</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('form.create') }}">{{ __('E-Prolegtin') }}</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">{{ __('JDIH') }}</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">{{ __('Login') }}</a></li>
+
                 </ul>
             </div>
         </div>

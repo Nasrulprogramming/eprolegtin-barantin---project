@@ -1,7 +1,10 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Dashboard') }}
+            <h1>{{ __('Dashboard') }}</h1>
+            <p>{{ __('User Submissions') }}</p>
+            <a href="#">{{ __('Export to Excel') }}</a>
+
         </h2>
     </x-slot>
 

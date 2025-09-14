@@ -4,6 +4,28 @@ use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminAuthController;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\AdminManagementController;
+use App\Http\Controllers\AdminForgotPasswordController;
+use App\Http\Controllers\AdminPasswordController;
+
+
+
+
+// Route::get('/lang/{locale}', function ($locale) {
+//     if (in_array($locale, ['id', 'en'])) {
+//         session(['locale' => $locale]);
+//     }
+//     return redirect()->back();
+// })->name('lang.switch');
+
+
+Route::get('/set-locale/{lang}', function ($lang) {
+    session(['locale' => $lang]);
+    return back();
+})->name('set-locale');
+
 
 
 Route::get('/', [SubmissionController::class, 'slide1'])->name('home');
@@ -37,13 +59,58 @@ Route::get('/thanks', [SubmissionController::class, 'thanks'])->name('submit.tha
 Route::get('/', [SubmissionController::class, 'slide1'])->name('slide1');
 
 Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
-    Route::get('/', [App\Http\Controllers\AdminController::class, 'index'])->name('admin.index');
+    Route::get('/', [AdminController::class, 'index'])->name('admin.index');
 
     // Tambahin ini buat detail submission
     Route::get('/submission/{id}', [SubmissionController::class, 'show'])->name('form.show');
 });
 
 // Hapus submission
-Route::delete('/admin/submission/{id}', [App\Http\Controllers\AdminController::class, 'destroy'])
+Route::delete('/admin/submission/{id}', [AdminController::class, 'destroy'])
     ->name('admin.submission.destroy')
     ->middleware('auth:admin');
+
+// Manajemen Admin
+Route::middleware(['auth:admin'])->group(function () {
+    Route::get('/admin/manage', [AdminManagementController::class, 'index'])->name('admin.manage');
+    Route::get('/admin/create', [AdminManagementController::class, 'create'])->name('admin.create');
+    Route::post('/admin/store', [AdminManagementController::class, 'store'])->name('admin.store');
+    Route::delete('/admin/{admin}', [AdminManagementController::class, 'destroy'])->name('admin.destroy');
+});
+
+// // Forgot Password (admin)
+// Route::prefix('admin')->group(function () {
+//     Route::get('/forgot-password', [AdminForgotPasswordController::class, 'showLinkRequestForm'])->name('admin.password.request');
+//     Route::post('/forgot-password', [AdminForgotPasswordController::class, 'sendResetLinkEmail'])->name('admin.password.email');
+//     Route::get('/reset-password/{token}', [AdminForgotPasswordController::class, 'showResetForm'])->name('admin.password.reset');
+//     Route::post('/reset-password', [AdminForgotPasswordController::class, 'reset'])->name('admin.password.update');
+// });
+
+// // Password Reset Routes (admin)
+
+// Route::prefix('admin')->group(function () {
+//     Route::get('password/reset', [AdminPasswordController::class, 'showResetForm'])->name('admin.password.reset');
+//     Route::post('password/reset', [AdminPasswordController::class, 'reset'])->name('admin.password.update');
+// });
+
+// Bisa diakses tanpa login
+Route::get('/admin/password/change', [AdminPasswordController::class, 'showChangeForm'])->name('admin.password.change');
+Route::post('/admin/password/change', [AdminPasswordController::class, 'changePassword'])->name('admin.password.change.update');
+
+Route::post('/admin/password/update', [AdminPasswordController::class, 'reset'])
+    ->name('admin.password.update');
+
+// Reset password by superadmin
+Route::middleware(['auth:admin'])->group(function () {
+    Route::get('/admin/{id}/reset-password', [AdminManagementController::class, 'resetForm'])
+        ->name('admin.reset.form');
+    Route::post('/admin/{id}/reset-password', [AdminManagementController::class, 'resetPassword'])
+        ->name('admin.reset.password');
+});
+
+Route::middleware(['auth:admin', 'superadmin'])->group(function () {
+    Route::get('/admin/manage', [AdminManagementController::class, 'index'])->name('admin.manage');
+    Route::get('/admin/create', [AdminManagementController::class, 'create'])->name('admin.create');
+    Route::post('/admin/store', [AdminManagementController::class, 'store'])->name('admin.store');
+    Route::delete('/admin/{admin}', [AdminManagementController::class, 'destroy'])->name('admin.destroy');
+});

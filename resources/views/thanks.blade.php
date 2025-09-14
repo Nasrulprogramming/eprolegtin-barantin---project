@@ -43,7 +43,7 @@
 <body>
     <div class="wrap">
         <h1>✅ Data Berhasil Dikirim</h1>
-        <p>Terima kasih sudah mengisi form E-Prolegtin.</p>
+        <p>Terima kasih sudah menginput pada Program Legislasi Karantina form E-Prolegtin.</p>
         <a href="{{ route('slide1') }}">Kembali ke Halaman Utama</a>
     </div>
 </body>
