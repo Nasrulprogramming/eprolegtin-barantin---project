@@ -1,59 +1,90 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="container mt-5">
+<div class="container mt-4">
     <h1 class="mb-4">📊 Dashboard Admin</h1>
-    <p>Daftar Submission User</p>
 
-    <div class="mb-3">
-        <a href="{{ route('admin.export.excel') }}" class="btn btn-success">Export Excel</a>
-        <a href="{{ route('admin.export.csv') }}" class="btn btn-primary">Export CSV</a>
-        <a href="{{ route('admin.export.pdf') }}" class="btn btn-danger">Export PDF</a>
+    {{-- ALERT --}}
+    @if(session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+    @if($errors->any())
+    <div class="alert alert-danger">{{ $errors->first() }}</div>
+    @endif
+
+    {{-- Statistik Regulasi --}}
+    <div class="row text-center mb-4">
+        <div class="col-md-4">
+            <div class="card bg-light p-3 shadow-sm">
+                <h2>{{ $usulan }}</h2>
+                <p>📌 Usulan Regulasi</p>
+                <a href="{{ route('admin.prolegs.index') }}" class="btn btn-sm btn-primary">Lihat Detail</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-light p-3 shadow-sm">
+                <h2>{{ $proses }}</h2>
+                <p>⚙️ Regulasi Proses</p>
+                <a href="{{ route('admin.prolegs.index') }}" class="btn btn-sm btn-primary">Lihat Detail</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-light p-3 shadow-sm">
+                <h2>{{ $diundangkan }}</h2>
+                <p>✅ Regulasi Diundangkan</p>
+                <a href="{{ route('admin.prolegs.index') }}" class="btn btn-sm btn-primary">Lihat Detail</a>
+            </div>
+        </div>
     </div>
 
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <!-- <th>ID</th> -->
-                <th>Unit Kerja</th>
-                <th>Judul Regulasi</th>
-                <th>Dasar Hukum</th>
-                <th>Deskripsi</th>
-                <th>File</th>
-                <th>Tanggal</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($submissions as $submission)
-            <tr>
-                <!-- <td>{{ $loop->iteration }}</td> Nomor urut rapih -->
-                <td>{{ $submission->unit_kerja }}</td>
-                <td>{{ $submission->usulan_judul }}</td>
-                <td>{{ $submission->dasar_hukum }}</td>
-                <td>{{ $submission->deskripsi_singkat }}</td>
-                <td>
-                    @if($submission->file_path)
-                    <a href="{{ asset('storage/'.$submission->file_path) }}" target="_blank">📂 Lihat File</a>
-                    @else
-                    -
-                    @endif
-                <td>{{ $submission->created_at->format('d-m-Y H:i') }}</td>
-                <td>
-                    <a href="{{ asset('storage/'.$submission->file_path) }}"
-                        download="{{ $submission->file_original_name }}"
-                        class="btn btn-sm btn-outline-primary">⬇️ Download</a>
-                    <a href="{{ route('form.show', $submission->id) }}" class="btn btn-sm btn-outline-info">👁 Lihat</a>
-                    <!-- Tombol Hapus -->
-                    <form action="{{ route('admin.submission.destroy', $submission->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Yakin mau hapus data ini?')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-outline-danger">🗑 Hapus</button>
-                    </form>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+    {{-- List Submission Terbaru --}}
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5>📝 Usulan Terbaru</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Unit Kerja</th>
+                        <th>Judul Usulan</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($prolegs as $index => $proleg)
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $proleg->unit_kerja ?? '-' }}</td>
+                        <td>{{ $proleg->usulan_judul }}</td>
+                        <td>
+                            {{-- Dropdown update status --}}
+                            <form method="POST" action="{{ route('admin.prolegs.updateStatus', $proleg->id) }}">
+                                @csrf
+                                @method('PATCH')
+                                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                                    <option value="usulan" {{ $proleg->status == 'usulan' ? 'selected' : '' }}>Usulan</option>
+                                    <option value="proses" {{ $proleg->status == 'proses' ? 'selected' : '' }}>Proses</option>
+                                    <option value="diundangkan" {{ $proleg->status == 'diundangkan' ? 'selected' : '' }}>Diundangkan</option>
+                                </select>
+                            </form>
+                        </td>
+                        <td>
+                            <a href="{{ route('admin.prolegs.index') }}" class="btn btn-sm btn-outline-primary">
+                                Kelola
+                            </a>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="text-center">Belum ada usulan regulasi</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 @endsection

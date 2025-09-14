@@ -10,6 +10,15 @@ use App\Http\Controllers\AdminManagementController;
 use App\Http\Controllers\AdminForgotPasswordController;
 use App\Http\Controllers\AdminPasswordController;
 
+use Illuminate\Http\Request;
+
+use App\Http\Controllers\ProlegController; // ← tambahin ini
+
+Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
+    Route::patch('/prolegs/{id}/status', [ProlegController::class, 'updateStatus'])->name('admin.prolegs.updateStatus');
+});
+
+
 
 
 
@@ -114,3 +123,49 @@ Route::middleware(['auth:admin', 'superadmin'])->group(function () {
     Route::post('/admin/store', [AdminManagementController::class, 'store'])->name('admin.store');
     Route::delete('/admin/{admin}', [AdminManagementController::class, 'destroy'])->name('admin.destroy');
 });
+
+Route::get('/admin/prolegs', [ProlegController::class, 'adminIndex'])->name('prolegs.admin');
+Route::patch('/admin/prolegs/{id}/status', [ProlegController::class, 'updateStatus'])->name('prolegs.updateStatus');
+
+Route::middleware(['auth', 'is_admin'])->group(function () {
+    Route::get('/admin/prolegs', [ProlegController::class, 'adminIndex'])->name('admin.prolegs.index');
+    Route::patch('/admin/prolegs/{proleg}/status', [ProlegController::class, 'updateStatus'])->name('admin.prolegs.updateStatus');
+});
+
+// Admin Auth
+Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
+Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
+Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
+
+Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
+    // Dashboard
+    Route::get('/', [AdminController::class, 'dashboard'])->name('admin.index');
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+
+    // Export
+    Route::get('/export/excel', [AdminController::class, 'exportExcel'])->name('admin.export.excel');
+    Route::get('/export/csv', [AdminController::class, 'exportCsv'])->name('admin.export.csv');
+    Route::get('/export/pdf', [AdminController::class, 'exportPdf'])->name('admin.export.pdf');
+
+    // Submission
+    Route::get('/submission/{id}', [SubmissionController::class, 'show'])->name('form.show');
+    Route::delete('/submission/{id}', [SubmissionController::class, 'destroy'])->name('admin.submission.destroy');
+
+    // Proleg
+    Route::get('/prolegs', [ProlegController::class, 'adminIndex'])->name('admin.prolegs.index');
+    Route::patch('/admin/prolegs/{id}/status', [ProlegController::class, 'updateStatus'])
+        ->name('admin.prolegs.updateStatus')
+        ->middleware('auth:admin');
+
+    // Manajemen Admin (buat superadmin aja kalau mau)
+    Route::get('/manage', [AdminManagementController::class, 'index'])->name('admin.manage');
+    Route::get('/create', [AdminManagementController::class, 'create'])->name('admin.create');
+    Route::post('/store', [AdminManagementController::class, 'store'])->name('admin.store');
+    Route::delete('/{admin}', [AdminManagementController::class, 'destroy'])->name('admin.destroy');
+});
+
+Route::patch('/admin/prolegs/{proleg}/status', [ProlegController::class, 'updateStatus'])
+    ->name('admin.prolegs.updateStatus')
+    ->middleware('auth:admin');
+
+Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.index');

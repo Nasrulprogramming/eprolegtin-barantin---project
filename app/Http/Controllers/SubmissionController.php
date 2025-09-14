@@ -5,15 +5,25 @@ namespace App\Http\Controllers;
 use App\Models\Submission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Proleg;
 
 class SubmissionController extends Controller
 {
-    // Slide 1 → tampil total download
+    // Slide 1 → Statistik Regulasi
+    // Slide 1 → Statistik Regulasi
     public function slide1()
     {
-        $totalDownloads = Submission::sum('file_downloads');
-        return view('slide1', compact('totalDownloads'));
+        $totalUsulan = \App\Models\Proleg::count(); // jumlah semua regulasi yang pernah diinput
+        $proses = \App\Models\Proleg::where('status', 'proses')->count();
+        $diundangkan = \App\Models\Proleg::where('status', 'diundangkan')->count();
+
+        return view('slide1', [
+            'usulan' => $totalUsulan,
+            'proses' => $proses,
+            'diundangkan' => $diundangkan,
+        ]);
     }
+
 
     // Form (Slide 2)
     public function create()
@@ -32,26 +42,16 @@ class SubmissionController extends Controller
             'naskah_urgensi' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
         ]);
 
-        $filePath = null;
-        $originalName = null;
+        // Default status = usulan
+        // Tambahin status default
+        $validated['status'] = 'usulan';
 
-        if ($request->hasFile('naskah_urgensi')) {
-            $file = $request->file('naskah_urgensi');
-            $originalName = $file->getClientOriginalName();
-            $filePath = $file->store('naskah_urgensi', 'public');
-        }
-
-        Submission::create([
-            'unit_kerja' => $validated['unit_kerja'],
-            'usulan_judul' => $validated['usulan_judul'],
-            'dasar_hukum' => $validated['dasar_hukum'],
-            'deskripsi_singkat' => $validated['deskripsi_singkat'],
-            'file_path' => $filePath,
-            'file_original_name' => $originalName,
-        ]);
+        // Simpan ke tabel prolegs
+        Proleg::create($validated);
 
         return redirect()->route('submit.thanks')->with('success', 'Data berhasil dikirim!');
     }
+
 
     // Halaman terima kasih
     public function thanks()
@@ -66,7 +66,7 @@ class SubmissionController extends Controller
             abort(404, 'File tidak ditemukan');
         }
 
-        $submission->increment('file_downloads'); // nambah counter
+        $submission->increment('file_downloads'); // nambah counter download
 
         $filePath = Storage::disk('public')->path($submission->file_path);
         return response()->download(
@@ -75,6 +75,7 @@ class SubmissionController extends Controller
         );
     }
 
+    // Detail submission untuk admin
     public function show($id)
     {
         $submission = Submission::findOrFail($id);

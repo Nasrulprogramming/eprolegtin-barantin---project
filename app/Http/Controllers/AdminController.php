@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Submission;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\SubmissionsExport;
+use App\Models\Proleg;
 use PDF;
 
 class AdminController extends Controller
@@ -46,5 +47,27 @@ class AdminController extends Controller
         $submission->delete();
 
         return redirect()->route('admin.index')->with('success', 'Data berhasil dihapus');
+    }
+
+    public function dashboard()
+    {
+        $submissions = Submission::latest()->get();
+        $prolegs = Proleg::latest()->get();
+
+        // Statistik
+        $usulan = Proleg::where('status', 'usulan')->count();
+        $proses = Proleg::where('status', 'proses')->count();
+        $diundangkan = Proleg::where('status', 'diundangkan')->count();
+
+        return view('admin.dashboard', compact('submissions', 'prolegs', 'usulan', 'proses', 'diundangkan'));
+    }
+
+    public function updateProlegStatus(Request $request, $id)
+    {
+        $proleg = Proleg::findOrFail($id);
+        $proleg->status = $request->status;
+        $proleg->save();
+
+        return redirect()->back()->with('success', 'Status regulasi berhasil diupdate.');
     }
 }
