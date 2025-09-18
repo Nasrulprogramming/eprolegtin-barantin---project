@@ -60,7 +60,7 @@
                         <td>{{ $proleg->unit_kerja ?? '-' }}</td>
                         <td>{{ $proleg->usulan_judul }}</td>
                         <td>
-                            {{-- Dropdown untuk ubah status --}}
+                            {{-- Dropdown update status --}}
                             <form method="POST" action="{{ route('admin.prolegs.updateStatus', $proleg->id) }}">
                                 @csrf
                                 @method('PATCH')
